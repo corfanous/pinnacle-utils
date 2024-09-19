@@ -8,24 +8,28 @@ import (
 
 func TestEmailIsValid(t *testing.T) {
 	suits := []struct {
-		Name  string
-		Email string
-		Valid bool
+		Name    string
+		Email   string
+		Expects bool
 	}{{
-		Name:  "Empty email",
-		Email: "",
-		Valid: false,
+		Name:    "Empty email",
+		Email:   "",
+		Expects: false,
 	}, {
-		Name:  "Name with empty address",
-		Email: "Kofi <>",
-		Valid: false,
+		Name:    "Name with empty address",
+		Email:   "Kofi <>",
+		Expects: false,
 	}, {
-		Name:  "Name with address",
-		Email: "kofi@gmail.com",
-		Valid: true,
+		Name:    "Name with address",
+		Email:   "kofi@gmail.com",
+		Expects: true,
+	}, {
+		Name:    "List of valid addresses",
+		Email:   "g@gmal.com,x@yahoo.com,lorna@stx.com",
+		Expects: true,
 	}}
 	for _, suit := range suits {
-		if EmailIsValid(suit.Email) == suit.Valid {
+		if EmailIsValid(suit.Email) == suit.Expects {
 			t.Logf("%s: %s: %s", suit.Name, suit.Email, "valid")
 		} else {
 			t.Errorf("%s: %s: %s", suit.Name, suit.Email, "invalid")
