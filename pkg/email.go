@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/mail"
@@ -20,31 +21,90 @@ func NewPlainAuth(hostname string, sender, password string) smtp.Auth {
 	return smtp.PlainAuth("", sender, password, hostname)
 }
 
-type MailMessage struct {
-	msg []byte
+type Header map[string][]string
+
+// Retrieves the first element of the Header Map
+func (h Header) Get(key string) string {
+	v := h[key]
+	if len(v) == 0 {
+		return ""
+	}
+	return v[0]
 }
 
-func (mm *MailMessage) SetHeader(key, value string) {
-	header := fmt.Sprintf("%s: %s\n", key, value)
-	if mm.msg == nil {
-		mm.msg = []byte(header)
+// Retrieves the list of values associated with a Key
+func (h Header) Values(key string) []string {
+	if h == nil {
+		return nil
+	}
+	return h[key]
+}
+
+// Sets the key value per of a header
+func (h Header) Set(key, value string) {
+	h[key] = append(h[key], value)
+}
+
+type MailMessage struct {
+	headers Header
+	// content string
+	body []byte
+}
+
+// Retrieves a MailMessage header value for a given key
+func (mm *MailMessage) GetHeader(key string) string {
+	return mm.headers.Get(key)
+}
+func (mm *MailMessage) GetHeaderValues(key string) []string {
+	return mm.headers.Values(key)
+}
+
+// Add a header
+func (mm *MailMessage) SetHeader(key string, value string) {
+	if mm.headers == nil {
+		mm.headers = make(Header)
+	}
+	mm.headers.Set(key, value)
+}
+
+// Set the content value
+func (mm *MailMessage) SetStringBody(msg string) {
+	if mm.body == nil {
+		mm.body = []byte(msg)
 	} else {
-		mm.msg = append(mm.msg, []byte(header)...)
+		mm.body = append(mm.body, []byte(msg)...)
 	}
 }
-func (mm *MailMessage) SetContent(msg string) {
-	msg = fmt.Sprintf("\n%s\n", msg)
-	if mm.msg == nil {
-		mm.msg = []byte(msg)
+func (mm *MailMessage) SetByteBody(msg []byte) {
+	if mm.body == nil {
+		mm.body = msg
 	} else {
-		mm.msg = append(mm.msg, []byte(msg)...)
+		mm.body = append(mm.body, msg...)
 	}
 }
+
+// Converts a mail to a corresponding
 func (mm *MailMessage) Build() ([]byte, error) {
-	if mm.msg == nil {
-		return nil, errors.New("empty message")
+	var buf bytes.Buffer
+	for key, vals := range mm.headers {
+		_, err := buf.WriteString(fmt.Sprintf("%s: %s\n", key, strings.Join(vals, ",")))
+		if err != nil {
+			return nil, err
+		}
 	}
-	return mm.msg, nil
+	//write the body
+	//start
+	_, err := buf.WriteString("\n")
+	if err != nil {
+		return nil, err
+	}
+	_, err = buf.Write(mm.body)
+	if err != nil {
+		return nil, err
+	}
+	//end
+	buf.WriteString("\n")
+	return buf.Bytes(), nil
 }
 
 type MailClient struct {
