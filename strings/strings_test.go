@@ -1,5 +1,5 @@
 package strings_test
 
 import (
-	//. "github.com/corfanous/pinnacle-utils/strings"
+// . "github.com/corfanous/pinnacle-utils/strings"
 )

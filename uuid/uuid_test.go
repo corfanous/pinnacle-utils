@@ -2,7 +2,9 @@ package uuid_test
 
 import (
 	. "github.com/corfanous/pinnacle-utils/uuid"
+	"testing"
 )
+
 func notString(cond bool) string {
 	if cond == false {
 		return "not a"

@@ -1,14 +1,13 @@
 package strings
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 )
+
 // Camelize camelizes a string
 func Camelize(word string) string {
 	return camelize(split(word), func(word string) string {
@@ -17,15 +16,18 @@ func Camelize(word string) string {
 		return fmt.Sprintf("%s%s", string(unicode.ToUpper(fchar)), word[1:])
 	})
 }
+
 // Pathify converts a word to a restfull resource path
 func Pathify(word string) string {
 	return Pluralize(strings.ToLower(strings.Join(split(word), "-")))
 }
+
 // Underscored split camel cased and hyphenated word and replace
 // with underscores(_)
 func Underscored(word string) string {
 	return strings.Join(split(word), "_")
 }
+
 // Hyphenized split camel cased and hyphenated word and replace
 // with hyphens(_)
 func Hyphenized(word string) string {
@@ -37,10 +39,12 @@ func Hyphenized(word string) string {
 func List(word string) string {
 	return Pluralize(word)
 }
+
 // Objectify converts a word into a souce code object name
 func Objectify(word string) string {
 	return strings.ToLower(strings.Join(split(word), "_"))
 }
+
 // Pluralize pluralizes a word
 func Pluralize(word string) string {
 	ending, _ := utf8.DecodeLastRuneInString(word)
@@ -53,20 +57,24 @@ func Pluralize(word string) string {
 		return fmt.Sprintf("%s%s", word, "s")
 	}
 }
+
 // HasSpaces check if word has white spaces
 func HasSpaces(word string) bool {
 	return len(strings.Split(word, " ")) > 1
 }
-// SingleCasedWord determines if a word is made up of all uppercase 
+
+// SingleCasedWord determines if a word is made up of all uppercase
 // or all lowercase characters
 func SingleCasedWord(word string) bool {
 	return AllUpperCase(word) || AllLowerCase(word)
 }
+
 // AllUpperCase determines if a word is made up of all uppcase
 func AllUpperCase(word string) bool {
 	result, _ := regexp.MatchString("^[A-Z]+$", word)
 	return result
 }
+
 // AllLowerCase determines if a word is made up of all lowercase characters
 func AllLowerCase(word string) bool {
 	result, _ := regexp.MatchString("^[a-z]+$", word)
